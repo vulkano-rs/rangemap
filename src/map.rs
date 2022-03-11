@@ -365,6 +365,39 @@ where
         }
     }
 
+    /// Splits a range in two at the provided key.
+    ///
+    /// Does nothing if no range exists at the key, or if the key is at a range boundary.
+    pub fn split_at(&mut self, key: &K) {
+        use core::ops::Bound;
+
+        // Find a range that contains the key, but doesn't start or end with the key.
+        let bounds = (
+            Bound::Unbounded,
+            Bound::Excluded(RangeStartWrapper::new(key.clone()..key.clone())),
+        );
+        let range_to_remove = match self
+            .btm
+            .range(bounds)
+            .next_back()
+            .filter(|(range_start_wrapper, _value)| range_start_wrapper.range.contains(key))
+        {
+            Some((k, _v)) => k.clone(),
+            None => return,
+        };
+
+        // Remove the range, and re-insert two new ranges with the same value, separated by the key.
+        let value = self.btm.remove(&range_to_remove).unwrap();
+        self.btm.insert(
+            RangeStartWrapper::new(range_to_remove.range.start..key.clone()),
+            value.clone(),
+        );
+        self.btm.insert(
+            RangeStartWrapper::new(key.clone()..range_to_remove.range.end),
+            value,
+        );
+    }
+
     /// Gets an iterator over all pairs of key range and value, where the key range overlaps with
     /// the provided range.
     ///
@@ -382,6 +415,27 @@ where
                 Bound::Included(RangeStartWrapper::new(start.clone()..start.clone())),
                 Bound::Excluded(RangeStartWrapper::new(end.clone()..end.clone())),
             )),
+        }
+    }
+
+    /// Gets a mutable iterator over all pairs of key range and value, where the key range overlaps
+    /// with the provided range.
+    ///
+    /// The iterator element type is `(&'a Range<K>, &'a mut V)`.
+    pub fn range_mut<'a>(&'a mut self, range: &'a Range<K>) -> RangeMutIter<'a, K, V> {
+        use core::ops::Bound;
+
+        let start = self
+            .get_key_value(&range.start)
+            .map_or(&range.start, |(k, _v)| &k.start);
+        let end = &range.end;
+        let bounds = (
+            Bound::Included(RangeStartWrapper::new(start.clone()..start.clone())),
+            Bound::Excluded(RangeStartWrapper::new(end.clone()..end.clone())),
+        );
+
+        RangeMutIter {
+            inner: self.btm.range_mut(bounds),
         }
     }
 
@@ -611,6 +665,36 @@ where
     V: 'a,
 {
     type Item = (&'a Range<K>, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(by_start, v)| (&by_start.range, v))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+/// A mutable iterator over entries of a `RangeMap` whose range overlaps with a specified range.
+///
+/// The iterator element type is `(&'a Range<K>, &'a mut V)`.
+///
+/// This `struct` is created by the [`range_mut`] method on [`RangeMap`]. See its
+/// documentation for more.
+///
+/// [`range_mut`]: RangeMap::range_mut
+pub struct RangeMutIter<'a, K, V> {
+    inner: alloc::collections::btree_map::RangeMut<'a, RangeStartWrapper<K>, V>,
+}
+
+impl<'a, K, V> core::iter::FusedIterator for RangeMutIter<'a, K, V> where K: Ord + Clone {}
+
+impl<'a, K, V> Iterator for RangeMutIter<'a, K, V>
+where
+    K: 'a,
+    V: 'a,
+{
+    type Item = (&'a Range<K>, &'a mut V);
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|(by_start, v)| (&by_start.range, v))
