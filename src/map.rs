@@ -100,6 +100,16 @@ where
         }
     }
 
+    /// Gets a mutable iterator over all pairs of key range and value,
+    /// ordered by key range.
+    ///
+    /// The iterator element type is `(&'a Range<K>, &'a mut V)`.
+    pub fn iter_mut(&mut self) -> IterMut<'_, K, V> {
+        IterMut {
+            inner: self.btm.iter_mut(),
+        }
+    }
+
     /// Insert a pair of key range and value into the map.
     ///
     /// If the inserted range partially or completely overlaps any
@@ -505,6 +515,42 @@ where
     }
 }
 
+impl<'a, K, V> core::iter::FusedIterator for Iter<'a, K, V> where K: Ord + Clone {}
+
+impl<'a, K, V> ExactSizeIterator for Iter<'a, K, V> where K: Ord + Clone {}
+
+/// An iterator over the entries of a `RangeMap`, ordered by key range.
+///
+/// The iterator element type is `(&'a Range<K>, &'a V)`.
+///
+/// This `struct` is created by the [`iter`] method on [`RangeMap`]. See its
+/// documentation for more.
+///
+/// [`iter`]: RangeMap::iter
+pub struct IterMut<'a, K, V> {
+    inner: alloc::collections::btree_map::IterMut<'a, RangeStartWrapper<K>, V>,
+}
+
+impl<'a, K, V> Iterator for IterMut<'a, K, V>
+where
+    K: 'a,
+    V: 'a,
+{
+    type Item = (&'a Range<K>, &'a mut V);
+
+    fn next(&mut self) -> Option<(&'a Range<K>, &'a mut V)> {
+        self.inner.next().map(|(by_start, v)| (&by_start.range, v))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl<'a, K, V> core::iter::FusedIterator for IterMut<'a, K, V> where K: Ord + Clone {}
+
+impl<'a, K, V> ExactSizeIterator for IterMut<'a, K, V> where K: Ord + Clone {}
+
 /// An owning iterator over the entries of a `RangeMap`, ordered by key range.
 ///
 /// The iterator element type is `(Range<K>, V)`.
@@ -536,6 +582,10 @@ impl<K, V> Iterator for IntoIter<K, V> {
         self.inner.size_hint()
     }
 }
+
+impl<K, V> core::iter::FusedIterator for IntoIter<K, V> where K: Ord + Clone {}
+
+impl<K, V> ExactSizeIterator for IntoIter<K, V> where K: Ord + Clone {}
 
 // We can't just derive this automatically, because that would
 // expose irrelevant (and private) implementation details.
