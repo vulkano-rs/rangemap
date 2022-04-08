@@ -442,8 +442,8 @@ where
     /// Gets an iterator over all pairs of key range and value, where the key range overlaps with
     /// the provided range.
     ///
-    /// The iterator element type is `(&'a RangeInclusive<K>, &'a V)`.
-    pub fn range<'a>(&'a self, range: &'a RangeInclusive<K>) -> RangeIter<'a, K, V> {
+    /// The iterator element type is `(&RangeInclusive<K>, &V)`.
+    pub fn range(&self, range: &RangeInclusive<K>) -> RangeIter<'_, K, V> {
         use core::ops::Bound;
 
         let start = self

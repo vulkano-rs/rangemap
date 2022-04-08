@@ -125,7 +125,7 @@ where
     }
 
     /// Gets an iterator over all ranges that overlap with the provided range.
-    pub fn range<'a>(&'a self, range: &'a RangeInclusive<T>) -> RangeIter<'a, T> {
+    pub fn range(&self, range: &RangeInclusive<T>) -> RangeIter<'_, T> {
         RangeIter {
             inner: self.rm.range(range),
         }

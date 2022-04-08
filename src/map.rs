@@ -411,8 +411,8 @@ where
     /// Gets an iterator over all pairs of key range and value, where the key range overlaps with
     /// the provided range.
     ///
-    /// The iterator element type is `(&'a Range<K>, &'a V)`.
-    pub fn range<'a>(&'a self, range: &'a Range<K>) -> RangeIter<'a, K, V> {
+    /// The iterator element type is `(&Range<K>, &V)`.
+    pub fn range(&self, range: &Range<K>) -> RangeIter<'_, K, V> {
         use core::ops::Bound;
 
         let start = self
@@ -431,8 +431,8 @@ where
     /// Gets a mutable iterator over all pairs of key range and value, where the key range overlaps
     /// with the provided range.
     ///
-    /// The iterator element type is `(&'a Range<K>, &'a mut V)`.
-    pub fn range_mut<'a>(&'a mut self, range: &'a Range<K>) -> RangeMutIter<'a, K, V> {
+    /// The iterator element type is `(&Range<K>, &mut V)`.
+    pub fn range_mut(&mut self, range: &Range<K>) -> RangeMutIter<'_, K, V> {
         use core::ops::Bound;
 
         let start = self
