@@ -1,13 +1,13 @@
 [package]
-name = "rangemap"
-version = "1.0.1"
+name = "vulkano-rangemap"
+version = "1.0.3"
 authors = ["Jeff Parsons <jeff@parsons.io>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/jeffparsons/rangemap"
-documentation = "https://docs.rs/rangemap"
-homepage = "https://github.com/jeffparsons/rangemap"
+repository = "https://github.com/vulkano-rs/rangemap"
+documentation = "https://docs.rs/vulkano-rangemap"
+homepage = "https://github.com/vulkano-rs/rangemap"
 description = """
 Map and set data structures whose keys are stored as ranges.
 
