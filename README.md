@@ -1,9 +1,8 @@
-# rangemap
+## ⚠️ This crate is a fork of [`rangemap`](https://github.com/jeffparsons/rangemap/).
 
-[![Crate](https://img.shields.io/crates/v/rangemap.svg)](https://crates.io/crates/rangemap)
-[![Docs](https://docs.rs/rangemap/badge.svg)](https://docs.rs/rangemap)
-[![Build status](https://github.com/jeffparsons/rangemap/workflows/CI/badge.svg)](https://github.com/jeffparsons/rangemap/actions)
-[![Rust](https://img.shields.io/badge/rust-1.46%2B-blue.svg?maxAge=3600)](https://github.com/jeffparsons/rangemap) <!-- Don't forget to update the GitHub actions config when bumping minimum Rust version. -->
+The Vulkano organization has created a fork of rangemap with additional functionality for use in [`vulkano`](https://github.com/vulkano-rs/vulkano). These changes will hopefully be upstreamed in the future.
+
+## rangemap
 
 [`RangeMap`] and [`RangeInclusiveMap`] are map data structures whose keys
 are stored as ranges. Contiguous and overlapping ranges that map to the same
